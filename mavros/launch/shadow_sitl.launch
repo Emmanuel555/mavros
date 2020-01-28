@@ -2,7 +2,7 @@
     <arg name="headless" default="false"/>
     <arg name="gui" default="true"/>
     <arg name="ns" default="/"/>
-    <arg name="world_path" default="$(find mavros)/../sim/worlds/testing_environment_5.world" />
+    <arg name="world_path" default="$(find mavros)/../sim/worlds/testing_environment_3.world" />
     <arg name="build" default="px4_sitl_default"/>
     <!--arg name="fcu_url" default="udp://:14540@localhost:14557"/--> 
     <arg name="fcu_url" default="udp://:14540@192.168.1.36:14557"/>
@@ -11,7 +11,7 @@
     <arg name="tgt_system" default="1" />
     <arg name="tgt_component" default="1" />
     <arg name="mavros_transformation" default="-1.57" />
-    <arg name="model" default="iris_depth_camera"/> <!--potentially there might be conflict if model was transferred to mavros, therefore, root folder remains in avoidance --> 
+    <arg name="model" default="$(find mavros)/../sim/models/iris_depth_camera"/> <!--potentially there might be conflict if model was transferred to mavros, therefore, root folder remains in avoidance --> 
 
     <param name="use_sim_time" value="true" />
 
