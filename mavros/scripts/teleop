@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+# vim:set ts=4 sw=4 et:
+#
+# Copyright 2015 UAVenture AG.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+# for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# Updated: Tarek Taha : tarek.taha@kustar.ac.ae, Vladimir Ermakov
+#    - Changed topic names after re-factoring : https://github.com/mavlink/mavros/issues/233
+#    - Use mavros.setpoint module for topics
+
+import rospy
+import thread
+import threading
+import time
+import mavros
+
+import numpy as np
+import sys, select, termios, tty
+from select import select
+
+from math import *
+from mavros.utils import *
+from mavros import setpoint as SP
+from std_msgs.msg import Header #type 
+from std_msgs.msg import Float64, Float32 #type from msg generation
+from geometry_msgs.msg import PoseStamped, Quaternion, TwistStamped, Twist #geometry
+#from tf.transformations import quaternion_from_euler #transformation
+from mavros_msgs.srv import CommandLong #service_class
+from mavros_msgs.msg import PositionTarget,ActuatorControl
+from sensor_msgs.msg import NavSatFix,Range,LaserScan #type
+#from teraranger_array.msg import RangeArray
+
+
+
+
+def getch():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        [i, o, e] = select([sys.stdin.fileno()], [], [], 1)
+        if i:
+            ch = sys.stdin.read(1)
+        else:
+            ch = None
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+
+
+def handle_keyboard():
+    global sync_pub
+    actuate = rospy.Publisher("/mavros/actuator_control", ActuatorControl, queue_size=3)
+    rospy.loginfo("Press i to start the gripper (command 1.0);")
+    rospy.loginfo("Press o to stop the gripper (command -1.0);")
+    rospy.loginfo("Press k to keep the last command (command 0.0);")
+    rospy.loginfo("Press q to quit;")
+
+
+    local_position = PoseStamped()
+    
+    msg = ActuatorControl()
+    msg.header.frame_id = "gripper"
+    msg.controls = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    msg.group_mix = 3
+    
+    while not rospy.is_shutdown():
+        what = getch()
+        if what == "i":
+            msg.controls[5] = 1.0
+            rospy.loginfo(msg)
+            rospy.loginfo("\nSending 1.0 to the channel 5 of the group mix 3 (AUX1)")
+            msg.header.stamp = rospy.Time.now()
+            actuate.publish(msg)
+
+        if what == "o":
+            msg.controls[5] = -1.0
+            rospy.loginfo(msg)
+            rospy.loginfo("\nSending -1.0 to the channel 5 of the group mix 3 (AUX1)")
+            msg.header.stamp = rospy.Time.now()
+            actuate.publish(msg)
+
+        if what == "k":
+            rospy.loginfo(msg)
+            rospy.loginfo("\nSending 0.0 to the channel 5 of the group mix 3 (AUX1)")
+            msg.controls[5] = 0.0
+            msg.header.stamp = rospy.Time.now()
+            actuate.publish(msg)
+        
+        if what == "q":
+            exit()
+
+
+if __name__ == '__main__':
+    try:
+        rospy.init_node('Gripper_test')
+        handle_keyboard()
+    except rospy.ROSInterruptException:
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
