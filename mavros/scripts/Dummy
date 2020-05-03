@@ -48,7 +48,7 @@ class Dummy:
     This class sends position targets to FCU's position controller
     """
     def __init__(self):
-        self.z = 1.8   
+        self.z = 3.0   
         self.armed = False  
         #self.collective = RangeArray()
         self.rate = rospy.Rate(50) # 10hz is the original 
@@ -65,19 +65,25 @@ class Dummy:
         self.speed = 0.45
     
 
-        rospy.wait_for_service('mavros/cmd/arming', 30) # wait for arming, queue for 30s
+        rospy.wait_for_service('uav3/mavros/cmd/arming', 30) # wait for arming, queue for 30s
 
         # rospy.Subscriber("subscribed topic",topic type,callback invoked with the message as the first arg)  
 
         #rospy.Subscriber("hub_1/ranges_raw", RangeArray, self.hub_callback)
-        rospy.Subscriber("mavros/local_position/pose", PoseStamped, self.position_callback)
-        self.pub_pos = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=10)
-        self.pub_spt = rospy.Publisher('mavros/setpoint_position/local', PoseStamped, queue_size=10)
-        self.pub_vel = rospy.Publisher('mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size=10)
-        self.message_pub = rospy.Publisher("/mavros/actuator_control", ActuatorControl, queue_size=10)
+        #rospy.Subscriber("mavros/local_position/pose", PoseStamped, self.position_callback)
+        #self.pub_pos = rospy.Publisher('mavros/setpoint_raw/local', PositionTarget, queue_size=10)
+        #self.pub_spt = rospy.Publisher('mavros/setpoint_position/local', PoseStamped, queue_size=10)
+        #self.pub_vel = rospy.Publisher('mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size=10)
+        #self.message_pub = rospy.Publisher("/mavros/actuator_control", ActuatorControl, queue_size=10)
 
-        rospy.wait_for_service('mavros/cmd/command', 30)
-        self._srv_cmd_long = rospy.ServiceProxy('mavros/cmd/command', CommandLong, persistent=True)
+        rospy.Subscriber("uav3/mavros/local_position/pose", PoseStamped, self.position_callback)
+        self.pub_pos = rospy.Publisher('uav3/mavros/setpoint_raw/local', PositionTarget, queue_size=10)
+        self.pub_spt = rospy.Publisher('uav3/mavros/setpoint_position/local', PoseStamped, queue_size=10)
+        self.pub_vel = rospy.Publisher('uav3/mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size=10)
+        self.message_pub = rospy.Publisher("uav3/mavros/actuator_control", ActuatorControl, queue_size=10)
+
+        rospy.wait_for_service('uav3/mavros/cmd/command', 30)
+        self._srv_cmd_long = rospy.ServiceProxy('uav3/mavros/cmd/command', CommandLong, persistent=True)
 
         #settings = termios.tcgetattr(sys.stdin)
         #tty.setraw(sys.stdin.fileno())
